@@ -3,14 +3,14 @@ import torch.nn.functional as F
 
 
 class ConvText(nn.Module):
-    def __init__(self, n_emb, emb_dim, seq_len, n_kernel, kernel_size, n_outputs, pad_idx=0):
+    def __init__(self, n_emb, emb_dim, n_kernel, kernel_size, n_outputs, pad_idx=0):
         super().__init__()
         self.n_kernel = n_kernel
 
         self.emb = nn.Embedding(num_embeddings=n_emb, embedding_dim=emb_dim,
                                 padding_idx=pad_idx)
 
-        self.conv = nn.Conv1d(seq_len, n_kernel, kernel_size)
+        self.conv = nn.Conv1d(emb_dim, n_kernel, kernel_size)
 
         self.pool = nn.MaxPool1d(kernel_size)
 
@@ -20,7 +20,7 @@ class ConvText(nn.Module):
 
     def forward(self, x):
         x = F.relu(self.emb(x))
-
+        x = x.transpose(1, 2)
         x = self.conv(x)
         x = F.relu(x)
         x = self.pool(x)
